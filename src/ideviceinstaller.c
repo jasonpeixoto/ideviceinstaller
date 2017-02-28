@@ -246,7 +246,7 @@ static int zip_get_contents(struct zip *zf, const char *filename, int locate_fla
 	zip_stat_init(&zs);
 
 	if (zip_stat_index(zf, zindex, 0, &zs) != 0) {
-		fprintf(stderr, "ERROR: zip_stat_index '%s' failed!\n", filename);
+	//	fprintf(stderr, "ERROR: zip_stat_index '%s' failed!\n", filename);
 		return -2;
 	}
 
@@ -570,7 +570,7 @@ static int afc_upload_file(afc_client_t afc, const char* filename, const char* d
 		amount = fread(buf, 1, sizeof(buf), f);
 		if (amount > 0) {
 			uint32_t written, total = 0;
-			while (total < amount) {
+			while (total < (uint32_t)amount) {
 				written = 0;
 				afc_error_t aerr = afc_file_write(afc, af, buf, amount, &written);
 				if (aerr != AFC_E_SUCCESS) {
@@ -579,7 +579,7 @@ static int afc_upload_file(afc_client_t afc, const char* filename, const char* d
 				}
 				total += written;
 			}
-			if (total != amount) {
+			if (total != (uint32_t)amount) {
 				fprintf(stderr, "Error: wrote only %d of %zu\n", total, amount);
 				afc_file_close(afc, af);
 				fclose(f);
@@ -896,7 +896,7 @@ run_again:
 					struct zip_stat zs;
 					zip_stat_init(&zs);
 					if (zip_stat_index(zf, i, 0, &zs) != 0) {
-						fprintf(stderr, "ERROR: zip_stat_index %" PRIu64 " failed!\n", i);
+					//	fprintf(stderr, "ERROR: zip_stat_index %" PRIu64 " failed!\n", i);
 						free(dstpath);
 						dstpath = NULL;
 						zip_fclose(zfile);
@@ -907,7 +907,7 @@ run_again:
 					dstpath = NULL;
 
 					zip_uint64_t zfsize = 0;
-					while (zfsize < zs.size) {
+					while (zfsize < (zip_uint64_t)zs.size) {
 						zip_int64_t amount = zip_fread(zfile, buf, sizeof(buf));
 						if (amount == 0) {
 							break;
@@ -915,7 +915,7 @@ run_again:
 
 						if (amount > 0) {
 							uint32_t written, total = 0;
-							while (total < amount) {
+							while (total < (uint32_t)amount) {
 								written = 0;
 								if (afc_file_write(afc, af, buf, amount, &written) !=
 									AFC_E_SUCCESS) {
@@ -924,8 +924,8 @@ run_again:
 								}
 								total += written;
 							}
-							if (total != amount) {
-								fprintf(stderr, "Error: wrote only %d of %" PRIi64 "\n", total, amount);
+							if (total != (uint32_t)amount) {
+								//fprintf(stderr, "Error: wrote only %d of %" PRIi64 "\n", total, amount);
 								afc_file_close(afc, af);
 								zip_fclose(zfile);
 								free(dstpath);
